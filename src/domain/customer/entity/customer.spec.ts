@@ -1,3 +1,7 @@
+import EventDispatcher from "../../@shared/event/event-dispatcher";
+import EnviaConsoleLogHandler from "../event/handler/envia-console-log-handler";
+import EnviaConsoleLog1Handler from "../event/handler/envia-console-log1-handler";
+import EnviaConsoleLog2Handler from "../event/handler/envia-console-log2-handler";
 import Address from "../value-object/address";
 import Customer from "./customer";
 
@@ -59,5 +63,48 @@ describe("Customer unit tests", () => {
 
     customer.addRewardPoints(10);
     expect(customer.rewardPoints).toBe(20);
+  });
+
+  it("should notify when customer is created", () => {
+    const eventDispatcher = new EventDispatcher();
+    const enviaConsoleLog1Handler = new EnviaConsoleLog1Handler();
+    const enviaConsoleLog2Handler = new EnviaConsoleLog2Handler();
+
+    eventDispatcher.register("CustomerCreatedEvent", enviaConsoleLog1Handler);
+    eventDispatcher.register("CustomerCreatedEvent", enviaConsoleLog2Handler);
+
+    const customer = new Customer("1", "Customer 1");
+    expect(
+      eventDispatcher.getEventHandlers["CustomerCreatedEvent"][0]
+    ).toMatchObject(enviaConsoleLog1Handler);
+    expect(
+      eventDispatcher.getEventHandlers["CustomerCreatedEvent"][1]
+    ).toMatchObject(enviaConsoleLog2Handler);
+  });
+
+  it("should notify when change address", () => {
+    const eventDispatcher = new EventDispatcher();
+    const enviaConsoleLogHandler = new EnviaConsoleLogHandler();
+
+    eventDispatcher.register(
+      "CustomerChangeAddressEvent",
+      enviaConsoleLogHandler
+    );
+
+    const customer = new Customer("1", "Customer 1");
+    customer.Address = new Address("Street 1", 123, "13330-250", "São Paulo");
+
+    const address = new Address(
+      "Rua Presidente Juscelino k. oliveira",
+      204,
+      "13486-570",
+      "Limeira"
+    );
+
+    customer.changeAddress(address);
+
+    expect(
+      eventDispatcher.getEventHandlers["CustomerChangeAddressEvent"][0]
+    ).toMatchObject(enviaConsoleLogHandler);
   });
 });
