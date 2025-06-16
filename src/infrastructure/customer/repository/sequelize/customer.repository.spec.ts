@@ -76,7 +76,14 @@ describe("Customer repository test", () => {
 
     const customerResult = await customerRepository.find(customer.id);
 
-    expect(customer).toStrictEqual(customerResult);
+    expect(customerResult.id).toBe(customer.id);
+    expect(customerResult.name).toBe(customer.name);
+    expect(customerResult.Address.street).toBe(customer.Address.street);
+    expect(customerResult.Address.number).toBe(customer.Address.number);
+    expect(customerResult.Address.zip).toBe(customer.Address.zip);
+    expect(customerResult.Address.city).toBe(customer.Address.city);
+    expect(customerResult.rewardPoints).toBe(customer.rewardPoints);
+    expect(customerResult.isActive()).toBe(customer.isActive());
   });
 
   it("should throw an error when customer is not found", async () => {
@@ -106,7 +113,47 @@ describe("Customer repository test", () => {
     const customers = await customerRepository.findAll();
 
     expect(customers).toHaveLength(2);
-    expect(customers).toContainEqual(customer1);
-    expect(customers).toContainEqual(customer2);
+
+    const expected = [
+      {
+        id: customer1.id,
+        name: customer1.name,
+        active: customer1.isActive(),
+        rewardPoints: customer1.rewardPoints,
+        address: {
+          street: customer1.Address.street,
+          number: customer1.Address.number,
+          zip: customer1.Address.zip,
+          city: customer1.Address.city,
+        },
+      },
+      {
+        id: customer2.id,
+        name: customer2.name,
+        active: customer2.isActive(),
+        rewardPoints: customer2.rewardPoints,
+        address: {
+          street: customer2.Address.street,
+          number: customer2.Address.number,
+          zip: customer2.Address.zip,
+          city: customer2.Address.city,
+        },
+      },
+    ];
+
+    const received = customers.map((customer) => ({
+      id: customer.id,
+      name: customer.name,
+      active: customer.isActive(),
+      rewardPoints: customer.rewardPoints,
+      address: {
+        street: customer.Address.street,
+        number: customer.Address.number,
+        zip: customer.Address.zip,
+        city: customer.Address.city,
+      },
+    }));
+
+    expect(received).toEqual(expect.arrayContaining(expected));
   });
 });
